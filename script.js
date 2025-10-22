@@ -94,7 +94,7 @@
     }
   };
 
-  // ---------------- Theme + Sound toggles
+  // ---------------- Sound toggles
   function setDarkIconByTheme() {
     const isDark = root.classList.contains("dark");
     if (darkIcon) darkIcon.src = isDark ? "assets/icons/moon.svg" : "assets/icons/sun.svg";
@@ -306,7 +306,7 @@
     }
   });
 
-  // ---------------- View More (projects)
+  // ---------------- View More (AKA brag about buster sword)
   document.addEventListener("click", (e) => {
     const btn = e.target.closest(".viewmore");
     if (!btn) return;
@@ -378,7 +378,7 @@
     });
   }
 
-  // ---------------- Buddy (GIF + music; start paused)
+  // ---------------- Kirby headphones pause and play (GIF + music; start paused)
   const buddy = document.getElementById("buddy");
   const buddyAudio = document.getElementById("buddyAudio");
   if (buddy && buddyAudio) {
