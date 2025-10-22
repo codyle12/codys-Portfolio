@@ -1,35 +1,51 @@
 (function () {
   const root = document.documentElement;
 
-  // ---------------- Config: volumes (quieter UI sounds) ----------------
-  const HTML_AUDIO_VOLUME = 0.2;
-  const FALLBACK_CLICK_GAIN = 0.03;
-  const FALLBACK_NOTE_GAIN  = 0.035;
+  // ---------------- Theme (default dark, remember)
+  const storedTheme = localStorage.getItem("theme");
+  if (storedTheme === "light" || storedTheme === "dark") {
+    root.classList.toggle("dark", storedTheme === "dark");
+  } else {
+    root.classList.add("dark");
+  }
 
-  // ---------------- Optional external SFX ----------------
+  // ---------------- Elements
+  const home        = document.getElementById("home");
+  const appWindows  = Array.from(document.querySelectorAll(".app-window"));
+  const launchers   = Array.from(document.querySelectorAll(".launch[data-app]"));
+  const darkToggle  = document.getElementById("darkToggle");
+  const soundToggle = document.getElementById("soundToggle");
+  const darkIcon    = document.getElementById("darkIcon");
+  const soundIcon   = document.getElementById("soundIcon");
+
+  // ---------------- Audio / SFX
   const clickEl   = document.getElementById("sfxClick");
   const darkOnEl  = document.getElementById("sfxDarkOn");
   const darkOffEl = document.getElementById("sfxDarkOff");
   const failEl    = document.getElementById("sfxFail");
-  [clickEl, darkOnEl, darkOffEl, failEl].forEach(el => el && (el.volume = HTML_AUDIO_VOLUME));
 
-  // ---------------- WebAudio fallback ----------------
-  const AudioCtx = window.AudioContext || window.webkitAudioContext;
-  const audioCtx = AudioCtx ? new AudioCtx() : null;
+  // Respect prior setting; default ON
+  let sfxOn = (localStorage.getItem("sfx") || "on") === "on";
+  if (clickEl)   clickEl.volume   = 0.35;
+  if (darkOnEl)  darkOnEl.volume  = 0.5;
+  if (darkOffEl) darkOffEl.volume = 0.5;
+  if (failEl)    failEl.volume    = 0.5;
 
-  function sfxPref() { return localStorage.getItem("sfx") !== "off"; }
-  let sfxOn = sfxPref();
+  // WebAudio fallback beeps (if audio elements missing or blocked)
+  let audioCtx = null;
+  const FALLBACK_CLICK_GAIN = 0.035;
+  const FALLBACK_NOTE_GAIN  = 0.045;
 
   function resumeAudioIfNeeded() {
-    if (audioCtx && audioCtx.state === "suspended") audioCtx.resume().catch(() => {});
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === "suspended") audioCtx.resume().catch(()=>{});
   }
-
-  function blip({ freq = 1600, duration = 0.04, type = "square", gain = FALLBACK_CLICK_GAIN }) {
-    if (!audioCtx || !sfxOn) return;
+  function blip({ freq = 1400, duration = 0.05, type = "square", gain = FALLBACK_CLICK_GAIN } = {}) {
+    if (!sfxOn) return;
     resumeAudioIfNeeded();
-    const t0 = audioCtx.currentTime;
+    const t0 = audioCtx.currentTime + 0.001;
     const osc = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
+    const g   = audioCtx.createGain();
     osc.type = type;
     osc.frequency.setValueAtTime(freq, t0);
     g.gain.setValueAtTime(gain, t0);
@@ -37,7 +53,6 @@
     osc.connect(g).connect(audioCtx.destination);
     osc.start(t0); osc.stop(t0 + duration);
   }
-
   function playEl(el) {
     if (!el || !sfxOn) return false;
     try { el.currentTime = 0; el.play().catch(() => {}); return true; } catch { return false; }
@@ -46,8 +61,9 @@
   const SFX = {
     click() { if (playEl(clickEl)) return; blip({ freq: 1900, duration: 0.03 }); },
     darkToggle(on) {
-      if (on) { if (playEl(darkOnEl)) return; } else { if (playEl(darkOffEl)) return; }
-      if (!audioCtx || !sfxOn) return;
+      if (on) { if (playEl(darkOnEl)) return; }
+      else    { if (playEl(darkOffEl)) return; }
+      if (!sfxOn) return;
       resumeAudioIfNeeded();
       const t0 = audioCtx.currentTime + 0.001;
       const note = (f, s, d = 0.06, g = FALLBACK_NOTE_GAIN) => {
@@ -63,7 +79,7 @@
     },
     fail() {
       if (playEl(failEl)) return;
-      if (!audioCtx || !sfxOn) return;
+      if (!sfxOn) return;
       resumeAudioIfNeeded();
       const t0 = audioCtx.currentTime + 0.001;
       const o = audioCtx.createOscillator();
@@ -78,48 +94,23 @@
     }
   };
 
-  // ---------------- Theme ----------------
-  const stored = localStorage.getItem("theme");
-  if (stored) root.classList.toggle("dark", stored === "dark"); else root.classList.add("dark");
-
-  const home = document.getElementById("home");
-  const appWindows = Array.from(document.querySelectorAll(".app-window"));
-  const darkToggle = document.getElementById("darkToggle");
-  const soundToggle = document.getElementById("soundToggle");
-  const launchers = Array.from(document.querySelectorAll(".launch[data-app]"));
-
-  // Icon elements (SVGs)
-  const darkIcon = document.getElementById("darkIcon");
-  const soundIcon = document.getElementById("soundIcon");
-
+  // ---------------- Theme + Sound toggles
   function setDarkIconByTheme() {
     const isDark = root.classList.contains("dark");
-    if (darkIcon) {
-      darkIcon.src = isDark ? "assets/icons/moon.svg" : "assets/icons/sun.svg";
-      darkToggle?.setAttribute("aria-pressed", String(isDark));
-      darkToggle?.setAttribute("title", isDark ? "Switch to light mode" : "Switch to dark mode");
+    if (darkIcon) darkIcon.src = isDark ? "assets/icons/moon.svg" : "assets/icons/sun.svg";
+    if (darkToggle) {
+      darkToggle.setAttribute("aria-pressed", String(isDark));
+      darkToggle.title = isDark ? "Switch to light mode" : "Switch to dark mode";
     }
   }
-
-  // ---------------- Sound toggle UI ----------------
   function setSoundToggleVisual() {
     if (!soundToggle) return;
     soundToggle.setAttribute("aria-pressed", String(!!sfxOn));
     if (soundIcon) soundIcon.src = sfxOn ? "assets/icons/sound-on.svg" : "assets/icons/sound-off.svg";
     soundToggle.title = sfxOn ? "UI sounds: on" : "UI sounds: off";
   }
-
   setDarkIconByTheme();
   setSoundToggleVisual();
-
-  if (soundToggle) {
-    soundToggle.addEventListener("click", () => {
-      sfxOn = !sfxOn;
-      localStorage.setItem("sfx", sfxOn ? "on" : "off");
-      setSoundToggleVisual();
-      if (sfxOn) SFX.click();
-    });
-  }
 
   if (darkToggle) {
     darkToggle.addEventListener("click", () => {
@@ -129,22 +120,34 @@
       SFX.darkToggle(nowDark);
     });
   }
+  if (soundToggle) {
+    soundToggle.addEventListener("click", () => {
+      sfxOn = !sfxOn;
+      localStorage.setItem("sfx", sfxOn ? "on" : "off");
+      setSoundToggleVisual();
+      if (sfxOn) SFX.click();
+    });
+  }
 
-  // ---------------- Global click SFX ----------------
+  // ---------------- Global click SFX for buttons (left mouse only)
   document.addEventListener("pointerdown", (e) => {
     if (e.button !== 0) return;
     const btn = e.target.closest("button");
     if (!btn) return;
+    // Don’t double-play for dark toggle itself
+    if (btn.id === "darkToggle") return;
+    // Don’t play if user just toggled sounds OFF
+    if (btn.id === "soundToggle" && sfxOn === false) return;
+
+    // Special case: if launching a window that’s already topmost, we’ll play fail later
     if (btn.classList.contains("launch") && btn.hasAttribute("data-app")) {
       const win = document.getElementById("win-" + btn.dataset.app);
       if (win && win.classList.contains("open") && isTopmostOpen(win)) return;
     }
-    if (btn.id === "darkToggle") return;
-    if (btn.id === "soundToggle" && sfxOn === false) return;
     SFX.click();
   }, { capture: true });
 
-  // ---------------- Windows helpers ----------------
+  // ---------------- Windows
   let z = 300;
   function bringToFront(el) { z += 1; el.style.zIndex = String(z); }
   function clamp(v, min, max) { return Math.min(Math.max(v, min), max); }
@@ -164,15 +167,35 @@
     const oy = Math.min(Math.max(y - rect.top, 0), rect.height);
     win.style.transformOrigin = `${ox}px ${oy}px`;
   }
-
   function growToFront(win, fromX, fromY) {
     if (Number.isFinite(fromX) && Number.isFinite(fromY)) setTransformOriginFromPoint(win, fromX, fromY);
-    win.classList.remove("opening"); void win.offsetWidth;
+    win.classList.remove("opening"); void win.offsetWidth; // restart animation
     win.classList.add("opening");
     win.addEventListener("animationend", () => win.classList.remove("opening"), { once: true });
     bringToFront(win);
   }
 
+  function cssNumber(varName, fallback) {
+    const val = getComputedStyle(root).getPropertyValue(varName).trim();
+    const n = parseFloat(val);
+    return Number.isFinite(n) ? n : fallback;
+  }
+  function limitsFor(win) {
+    const tb = cssNumber("--titlebar-h", 48);
+    const minTop = -(tb - 12);
+    const minLeft = -(win.offsetWidth - 80);
+    const maxLeft = window.innerWidth - 40;
+    const maxTop  = window.innerHeight - 40;
+    return { minTop, maxTop, minLeft, maxLeft };
+  }
+  function nudgeIntoView(win) {
+    const rect = win.getBoundingClientRect();
+    const { minTop, maxTop, minLeft, maxLeft } = limitsFor(win);
+    const newLeft = clamp(rect.left, minLeft, Math.max(minLeft, maxLeft));
+    const newTop  = clamp(rect.top,  minTop,  Math.max(minTop,  maxTop));
+    win.style.left = newLeft + "px";
+    win.style.top  = newTop + "px";
+  }
   function placeBelowHome(win, offsetIndex) {
     if (!home) return;
     const pad = 12;
@@ -197,7 +220,7 @@
     if (app === "contact") initCaptcha();
   }
 
-  // Launchers: open, bring-to-front, or fail
+  // Launchers: open, bring-to-front, or fail (shake+sound) if already front
   launchers.forEach((btn, i) => btn.addEventListener("click", (e) => {
     const win = document.getElementById("win-" + btn.dataset.app);
     if (!win || !win.classList.contains("open")) return openApp(btn.dataset.app, i, e.clientX, e.clientY);
@@ -206,7 +229,7 @@
     SFX.fail();
   }));
 
-  // Wire close buttons
+  // Close buttons
   function wireCloseButtons(scope = document) {
     scope.querySelectorAll(".close").forEach((btn) => {
       if (btn.dataset.wired) return;
@@ -222,7 +245,7 @@
   }
   wireCloseButtons();
 
-  // Dragging
+  // Drag windows
   Array.from(document.querySelectorAll(".app-window")).forEach((win) => {
     const handle = win.querySelector(".drag-handle");
     if (!handle) return;
@@ -242,9 +265,11 @@
     window.addEventListener("pointermove", (e) => {
       if (!dragging) return;
       e.preventDefault();
-      const left = Math.min(Math.max(e.clientX - dx, -(win.offsetWidth - 80)), window.innerWidth - 40);
-      const top  = Math.min(Math.max(e.clientY - dy, -(parseFloat(getComputedStyle(root).getPropertyValue('--titlebar-h')) - 12)), window.innerHeight - 40);
-      win.style.left = left + "px"; win.style.top = top + "px";
+      const { minTop, maxTop, minLeft, maxLeft } = limitsFor(win);
+      const left = clamp(e.clientX - dx, minLeft, maxLeft);
+      const top  = clamp(e.clientY - dy, minTop,  maxTop);
+      win.style.left = left + "px";
+      win.style.top  = top + "px";
     }, { passive: false });
 
     window.addEventListener("pointerup", (e) => {
@@ -255,30 +280,69 @@
     });
 
     win.addEventListener("mousedown", () => bringToFront(win));
-    window.addEventListener("resize", () => {
-      if (!win.classList.contains("open")) return;
-      const rect = win.getBoundingClientRect();
-      const left = Math.min(Math.max(rect.left, -(win.offsetWidth - 80)), window.innerWidth - 40);
-      const top  = Math.min(Math.max(rect.top, -(parseFloat(getComputedStyle(root).getPropertyValue('--titlebar-h')) - 12)), window.innerHeight - 40);
-      win.style.left = left + "px"; win.style.top = top + "px";
-    });
+    window.addEventListener("resize", () => nudgeIntoView(win));
   });
 
-  // ---------------- Contact: CAPTCHA + send to backend ----------------
+  // ESC closes topmost open window
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    const openWins = Array.from(document.querySelectorAll(".app-window.open"));
+    if (!openWins.length) return;
+    const topmost = openWins.reduce((a, b) =>
+      (parseInt(getComputedStyle(a).zIndex || "0") > parseInt(getComputedStyle(b).zIndex || "0")) ? a : b
+    );
+    topmost.classList.remove("open");
+    if (topmost.id === "win-sent") topmost.style.display = "none";
+  });
+
+  // Keep inputs visible on mobile keyboards
+  document.addEventListener("focusin", (e) => {
+    const el = e.target;
+    if (!(el instanceof HTMLElement)) return;
+    if (!el.matches("input, textarea, select")) return;
+    const content = el.closest(".app-window .content");
+    if (content) {
+      setTimeout(() => { el.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" }); }, 100);
+    }
+  });
+
+  // ---------------- View More (projects)
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest(".viewmore");
+    if (!btn) return;
+    const id = btn.getAttribute("data-target");
+    const panel = document.getElementById(id);
+    if (!panel) return;
+    const isOpen = panel.classList.toggle("open");
+    if (isOpen) {
+      panel.removeAttribute("hidden");
+      btn.setAttribute("aria-expanded", "true");
+      if (btn.textContent.trim().toLowerCase() === "view more") btn.textContent = "View less";
+      panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    } else {
+      panel.setAttribute("hidden", "");
+      btn.setAttribute("aria-expanded", "false");
+      if (btn.textContent.trim().toLowerCase() === "view less") btn.textContent = "View more";
+    }
+  });
+
+  // ---------------- Contact (mailto + tiny success)
   const form = document.getElementById("contactForm");
   const captchaQ = document.getElementById("captchaQuestion");
   const captchaA = document.getElementById("captchaAnswer");
   const successWin = document.getElementById("win-sent");
 
   function rand(n, m) { return Math.floor(Math.random() * (m - n + 1)) + n; }
+  let captchaAnswer = null;
   function initCaptcha() {
     if (!captchaQ || !captchaA) return;
     const a = rand(2, 9);
     const b = rand(2, 9);
-    initCaptcha.answer = a + b;
+    captchaAnswer = a + b;
     captchaQ.textContent = `What is ${a} + ${b}?`;
     captchaA.value = "";
   }
+  initCaptcha();
 
   if (form) {
     form.addEventListener("submit", (e) => {
@@ -289,39 +353,32 @@
       const message = (document.getElementById("message").value || "").trim();
       const cap = (captchaA.value || "").trim();
       if (!name || !email || !subject || !message) { alert("Please fill out all fields."); return; }
-      if (String(initCaptcha.answer) !== cap) { alert("CAPTCHA incorrect. Please try again."); initCaptcha(); return; }
+      if (String(captchaAnswer) !== cap) { alert("CAPTCHA incorrect. Please try again."); initCaptcha(); return; }
 
-      fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, subject, message })
-      }).then(async (r) => {
-        if (!r.ok) {
-          const data = await r.json().catch(() => ({}));
-          alert(data.error ? `Send failed: ${data.error}` : "Send failed. Please try again later.");
-          return;
-        }
-        if (successWin) {
-          successWin.style.display = "block";
-          successWin.classList.add("open");
-          // center tiny success window
-          const pad = 12;
-          successWin.style.visibility = "hidden"; successWin.style.display = "block";
-          const rr = successWin.getBoundingClientRect();
-          const left = Math.max(pad, (window.innerWidth - rr.width) / 2);
-          const top  = Math.max(pad, (window.innerHeight - rr.height) / 2);
-          successWin.style.left = left + "px"; successWin.style.top  = top + "px";
-          successWin.style.visibility = "";
-        }
-        form.reset();
-        initCaptcha();
-      }).catch(() => {
-        alert("Network error. Please try again later.");
-      });
+      const to = "codyle129@gmail.com";
+      const fullSubject = `[Portfolio] ${subject}`;
+      const body = `From: ${name} <${email}>\n\n${message}`;
+      const mailto = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(fullSubject)}&body=${encodeURIComponent(body)}`;
+      window.location.href = mailto;
+
+      if (successWin) {
+        successWin.style.display = "block";
+        successWin.classList.add("open");
+        // center tiny success window
+        const pad = 12;
+        successWin.style.visibility = "hidden"; successWin.style.display = "block";
+        const rr = successWin.getBoundingClientRect();
+        const left = Math.max(pad, (window.innerWidth - rr.width) / 2);
+        const top  = Math.max(pad, (window.innerHeight - rr.height) / 2);
+        successWin.style.left = left + "px"; successWin.style.top  = top + "px";
+        successWin.style.visibility = "";
+      }
+      form.reset();
+      initCaptcha();
     });
   }
 
-  // ---------------- Buddy (GIF only) ----------------
+  // ---------------- Buddy (GIF + music; start paused)
   const buddy = document.getElementById("buddy");
   const buddyAudio = document.getElementById("buddyAudio");
   if (buddy && buddyAudio) {
@@ -338,49 +395,4 @@
       if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleBuddy(); }
     });
   }
-
-  // ---------------- Backend: Single-active-tab per visitor ----------------
-  const HEARTBEAT_MS = 10000; // 10s
-
-  function getVisitorId() {
-    let v = localStorage.getItem("visitor_id");
-    if (!v) { v = (self.crypto?.randomUUID?.() || String(Math.random())).replace(/[^a-z0-9-]/gi, ""); localStorage.setItem("visitor_id", v); }
-    return v;
-  }
-
-  let sessionId = null;
-  let hb = null;
-
-  function standbyOverlay() {
-    const tpl = document.getElementById("standbyTemplate"); if (!tpl) return;
-    const overlay = tpl.content.firstElementChild.cloneNode(true);
-    overlay.querySelector(".standby-btn").addEventListener("click", () => { window.location.href = "/replaced.html"; });
-    document.body.appendChild(overlay);
-    try { buddyAudio?.pause(); } catch {}
-  }
-
-  async function claimSession() {
-    const visitorId = getVisitorId();
-    const res = await fetch("/api/session/claim", { method: "POST", headers: { "Content-Type":"application/json" }, body: JSON.stringify({ visitorId }) });
-    if (!res.ok) return;
-    const data = await res.json();
-    sessionId = data.sessionId;
-  }
-
-  async function sendHeartbeat() {
-    if (!sessionId) return;
-    const visitorId = getVisitorId();
-    const res = await fetch("/api/session/heartbeat", { method: "POST", headers: { "Content-Type":"application/json" }, body: JSON.stringify({ visitorId, sessionId }) });
-    if (res.status === 409) { clearInterval(hb); standbyOverlay(); return; }
-  }
-
-  (async function initSingleton() {
-    try {
-      await claimSession();
-      await sendHeartbeat();
-      hb = setInterval(sendHeartbeat, HEARTBEAT_MS);
-      window.addEventListener("beforeunload", () => { clearInterval(hb); });
-    } catch {}
-  })();
-
 })();
