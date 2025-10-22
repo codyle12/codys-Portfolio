@@ -1,0 +1,8 @@
+{
+  "version": 2,
+  "routes": [
+    { "src": "/api/contact", "dest": "/api/contact.ts" },
+    { "src": "/api/session/claim", "dest": "/api/session/claim.ts" },
+    { "src": "/api/session/heartbeat", "dest": "/api/session/heartbeat.ts" }
+  ]
+}
