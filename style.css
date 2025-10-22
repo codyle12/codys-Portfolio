@@ -363,3 +363,98 @@ body {
   #win-contact { width: 94vw; }
 }
 
+.dock-icon {
+  width: 60%;
+  height: 60%;
+  display: block;
+  margin: 0 auto;
+  pointer-events: none; /* so clicks go to the button, not the image */
+}
+
+.icon.launch:hover .dock-icon {
+  transform: translateY(-2px);
+  transition: transform 0.15s ease;
+}
+
+.icon.launch:active .dock-icon {
+  transform: translateY(1px);
+}
+
+/* Light mode glow */
+body:not(.dark) .icon.launch:hover .dock-icon {
+  filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.4));
+}
+
+/* Dark mode glow */
+body.dark .icon.launch:hover .dock-icon {
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.6));
+}
+
+/* Smooth transitions */
+.dock-icon {
+  transition: transform 0.15s ease, filter 0.3s ease;
+}
+
+/* === Contact form placeholder styling (pixel + readable) === */
+::placeholder {
+  font-family: 'pixel', monospace;  /* matches your pixel font */
+  font-style: normal;               /* no italics */
+  letter-spacing: 0.5px;
+  color: rgba(0, 0, 0, 0.55);       /* soft gray, readable on light bg */
+}
+
+body.dark ::placeholder {
+  color: rgba(255, 255, 255, 0.75); /* lighter tone for dark mode */
+}
+
+input[type="text"],
+input[type="email"],
+textarea {
+  font-family: 'pixel', monospace;      /* match your pixel font */
+  font-size: 14px;
+  color: var(--text, #000);
+  background-color: var(--surface, #f8f8f8);
+  border: 2px solid #222;
+  box-shadow: 0 0 0 1px #fff inset;     /* gives that 1px “screen” edge */
+  border-radius: 0;                     /* hard corners, pixel feel */
+  padding: 6px 8px;
+  outline: none;
+  transition: box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+body.dark input[type="text"],
+body.dark input[type="email"],
+body.dark textarea {
+  background-color: #222;
+  color: #fff;
+  border: 2px solid #555;
+  box-shadow: 0 0 0 1px #000 inset;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+textarea:focus {
+  border-color: var(--accent, #4ee1ff);
+  box-shadow:
+    0 0 0 1px #fff inset,
+    0 0 0 2px var(--accent, #4ee1ff);
+  background-color: #fff;
+}
+
+body.dark input[type="text"]:focus,
+body.dark input[type="email"]:focus,
+body.dark textarea:focus {
+  border-color: var(--accent, #4ee1ff);
+  box-shadow:
+    0 0 0 1px #000 inset,
+    0 0 0 2px var(--accent, #4ee1ff);
+  background-color: #111;
+}
+
+textarea,
+input[type="text"],
+input[type="email"] {
+  caret-color: var(--accent, #4ee1ff);
+}
+
+

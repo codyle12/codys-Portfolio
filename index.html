@@ -51,11 +51,19 @@
         <div class="hello">Hi! I'm <span class="name">Cody</span></div>
         <p class="hello-subtitle">full-stack web developer, gamer, and aspiring software engineer :)</p>
         <div class="dock" role="list">
-          <button class="icon launch" role="listitem" data-app="about">A</button>
-          <button class="icon launch" role="listitem" data-app="projects">P</button>
-          <button class="icon launch" role="listitem" data-app="contact">C</button>
-          <button class="icon launch" role="listitem" data-app="links">L</button>
-        </div>
+  <button class="icon launch" role="listitem" data-app="about" aria-label="About">
+    <img src="assets/icons/A.svg" alt="About" class="dock-icon">
+  </button>
+  <button class="icon launch" role="listitem" data-app="projects" aria-label="Projects">
+    <img src="assets/icons/P.svg" alt="Projects" class="dock-icon">
+  </button>
+  <button class="icon launch" role="listitem" data-app="contact" aria-label="Contact">
+    <img src="assets/icons/C.svg" alt="Contact" class="dock-icon">
+  </button>
+  <button class="icon launch" role="listitem" data-app="links" aria-label="Links">
+    <img src="assets/icons/L.svg" alt="Links" class="dock-icon">
+  </button>
+</div>
       </div>
     </section>
 
@@ -135,19 +143,19 @@
           <form id="contactForm" autocomplete="on">
             <div class="form-row">
               <label for="name">Your Name</label>
-              <input id="name" name="name" type="text" required/>
+              <input id="name" name="name" type="text" required placeholder="e.g. Aerith">
             </div>
             <div class="form-row">
               <label for="email">Your Email</label>
-              <input id="email" name="email" type="email" required/>
+              <input id="email" name="email" type="email" required placeholder="your@emailhere.com">
             </div>
             <div class="form-row">
               <label for="subject">Subject</label>
-              <input id="subject" name="subject" type="text" required/>
+              <input id="subject" name="subject" type="text" required placeholder="Let's build something cool!">
             </div>
             <div class="form-row">
               <label for="message">Message</label>
-              <textarea id="message" name="message" rows="8" required></textarea>
+              <textarea id="message" name="message" rows="8" required placeholder="Write your message here... (May not be working yet so I included my email just in case)"></textarea>
             </div>
             <div class="form-row captcha">
               <label id="captchaLabel" for="captchaAnswer">Prove you’re human:</label>

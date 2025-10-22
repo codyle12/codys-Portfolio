@@ -396,3 +396,35 @@
     });
   }
 })();
+
+
+document.querySelectorAll(".dock .icon.launch[data-app]").forEach(btn => {
+  const app = btn.dataset.app?.toLowerCase();
+  const existingImg = btn.querySelector("img");
+  if (existingImg) return; // already has icon, skip
+
+  let iconSrc = "";
+  switch (app) {
+    case "about":
+      iconSrc = "assets/icons/A.svg";
+      break;
+    case "projects":
+      iconSrc = "assets/icons/P.svg";
+      break;
+    case "contact":
+      iconSrc = "assets/icons/C.svg";
+      break;
+    case "links":
+      iconSrc = "assets/icons/L.svg";
+      break;
+  }
+
+  if (iconSrc) {
+    const img = document.createElement("img");
+    img.src = iconSrc;
+    img.alt = `${app} icon`;
+    img.classList.add("dock-icon");
+    btn.textContent = "";
+    btn.appendChild(img);
+  }
+});
