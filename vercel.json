@@ -1,8 +1,15 @@
 {
-  "version": 2,
+  "builds": [
+    { "src": "index.html", "use": "@vercel/static" },
+    { "src": "script.js", "use": "@vercel/static" },
+    { "src": "style.css", "use": "@vercel/static" },
+    { "src": "assets/**", "use": "@vercel/static" },
+    { "src": "api/**/*.ts", "use": "@vercel/node" }
+  ],
   "routes": [
-    { "src": "/api/contact", "dest": "/api/contact.ts" },
-    { "src": "/api/session/claim", "dest": "/api/session/claim.ts" },
-    { "src": "/api/session/heartbeat", "dest": "/api/session/heartbeat.ts" }
-  ]
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/(.*\\..*)", "dest": "/$1" },
+    { "src": "/.*", "dest": "/index.html" }
+  ],
+  "outputDirectory": "."
 }
