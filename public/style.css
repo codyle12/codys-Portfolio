@@ -482,4 +482,29 @@ input[type="email"] {
   }
 }
 
+/* Slight drop shadow or glow around the icons (darkmodetog&soundtog) */
+#darkIcon,
+#soundIcon {
+  filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.6));
+  transition: filter 0.25s ease;
+}
+
+/* Light mode: use darker shadow for contrast */
+:root:not(.dark) #darkIcon,
+:root:not(.dark) #soundIcon {
+  filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.7));
+}
+
+/* Dark mode: softer glow (light) for contrast */
+:root.dark #darkIcon,
+:root.dark #soundIcon {
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.65));
+}
+
+/* Optional hover pop */
+.icon-btn:hover img {
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.9));
+}
+
+
 
