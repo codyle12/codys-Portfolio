@@ -94,7 +94,7 @@
     }
   };
 
-  // ---------------- Theme + Sound toggles
+  // ---------------- Sound toggles
   function setDarkIconByTheme() {
     const isDark = root.classList.contains("dark");
     if (darkIcon) darkIcon.src = isDark ? "assets/icons/moon.svg" : "assets/icons/sun.svg";
@@ -306,7 +306,7 @@
     }
   });
 
-  // ---------------- View More (projects)
+  // ---------------- View More (AKA brag about buster sword)
   document.addEventListener("click", (e) => {
     const btn = e.target.closest(".viewmore");
     if (!btn) return;
@@ -355,11 +355,37 @@
       if (!name || !email || !subject || !message) { alert("Please fill out all fields."); return; }
       if (String(captchaAnswer) !== cap) { alert("CAPTCHA incorrect. Please try again."); initCaptcha(); return; }
 
-      const to = "codyle129@gmail.com";
-      const fullSubject = `[Portfolio] ${subject}`;
-      const body = `From: ${name} <${email}>\n\n${message}`;
-      const mailto = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(fullSubject)}&body=${encodeURIComponent(body)}`;
-      window.location.href = mailto;
+      // Submit to serverless email instead of opening Outlook using resend
+fetch("/api/contact", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ name, email, subject, message })
+})
+.then(async (r) => {
+  if (!r.ok) {
+    const err = await r.json().catch(() => ({}));
+    throw new Error(err.error || "Failed to send");
+  }
+  return r.json();
+})
+.then(() => {
+  if (successWin) {
+    successWin.style.display = "block";
+    successWin.classList.add("open");
+    const pad = 12;
+    successWin.style.visibility = "hidden"; successWin.style.display = "block";
+    const rr = successWin.getBoundingClientRect();
+    const left = Math.max(pad, (window.innerWidth - rr.width) / 2);
+    const top  = Math.max(pad, (window.innerHeight - rr.height) / 2);
+    successWin.style.left = left + "px"; successWin.style.top  = top + "px";
+    successWin.style.visibility = "";
+  }
+  form.reset();
+  initCaptcha();
+})
+.catch((e) => {
+  alert("Sorry, your message could not be sent right now. Please try again.\n\n" + e.message);
+});
 
       if (successWin) {
         successWin.style.display = "block";
@@ -378,7 +404,7 @@
     });
   }
 
-  // ---------------- Buddy (GIF + music; start paused)
+  // ---------------- Kirby headphones pause and play (GIF + music; start paused)
   const buddy = document.getElementById("buddy");
   const buddyAudio = document.getElementById("buddyAudio");
   if (buddy && buddyAudio) {
