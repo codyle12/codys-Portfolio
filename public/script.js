@@ -439,3 +439,29 @@ document.querySelectorAll(".dock .icon.launch[data-app]").forEach(btn => {
     btn.appendChild(img);
   }
 });
+
+// === Cursor (Grabbing) ===
+(function () {
+  let isDown = false;
+
+  document.addEventListener("mousedown", (e) => {
+    const onTitlebar = e.target.closest(".titlebar");
+    if (onTitlebar && !onTitlebar.closest("#home")) {
+      isDown = true;
+      document.body.classList.add("is-dragging");
+      const win = onTitlebar.closest(".window");
+      if (win) win.classList.add("is-dragging");
+    }
+  });
+
+  document.addEventListener("mouseup", () => {
+    if (isDown) {
+      isDown = false;
+      document.body.classList.remove("is-dragging");
+      document
+        .querySelectorAll(".window.is-dragging")
+        .forEach((w) => w.classList.remove("is-dragging"));
+    }
+  });
+})();
+
