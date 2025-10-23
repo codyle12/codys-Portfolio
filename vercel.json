@@ -1,4 +1,9 @@
 {
+  "functions": {
+    "api/**/*.ts": {
+      "runtime": "nodejs20.x"
+    }
+  },
   "builds": [
     { "src": "index.html", "use": "@vercel/static" },
     { "src": "script.js", "use": "@vercel/static" },
@@ -10,6 +15,5 @@
     { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/(.*\\..*)", "dest": "/$1" },
     { "src": "/.*", "dest": "/index.html" }
-  ],
-  "outputDirectory": "."
+  ]
 }
