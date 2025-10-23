@@ -94,7 +94,7 @@
     }
   };
 
-  // ---------------- Sound toggles
+  // ---------------- Theme + Sound toggles
   function setDarkIconByTheme() {
     const isDark = root.classList.contains("dark");
     if (darkIcon) darkIcon.src = isDark ? "assets/icons/moon.svg" : "assets/icons/sun.svg";
@@ -306,7 +306,7 @@
     }
   });
 
-  // ---------------- View More (AKA brag about buster sword)
+  // ---------------- View More (projects)
   document.addEventListener("click", (e) => {
     const btn = e.target.closest(".viewmore");
     if (!btn) return;
@@ -355,20 +355,19 @@
       if (!name || !email || !subject || !message) { alert("Please fill out all fields."); return; }
       if (String(captchaAnswer) !== cap) { alert("CAPTCHA incorrect. Please try again."); initCaptcha(); return; }
 
-      // Submit to serverless email instead of opening Outlook using resend
-fetch("/api/contact", {
+      // Send directly to Formspree (no Outlook, no backend needed)
+fetch(form.action, {
   method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ name, email, subject, message })
+  headers: { "Accept": "application/json" },
+  body: new FormData(form) // sends name, email, subject, message
 })
 .then(async (r) => {
   if (!r.ok) {
     const err = await r.json().catch(() => ({}));
-    throw new Error(err.error || "Failed to send");
+    throw new Error(err.errors?.[0]?.message || "Failed to send");
   }
-  return r.json();
-})
-.then(() => {
+
+  // Show your tiny success window (keeps your current UI)
   if (successWin) {
     successWin.style.display = "block";
     successWin.classList.add("open");
@@ -380,31 +379,18 @@ fetch("/api/contact", {
     successWin.style.left = left + "px"; successWin.style.top  = top + "px";
     successWin.style.visibility = "";
   }
+
   form.reset();
   initCaptcha();
 })
 .catch((e) => {
-  alert("Sorry, your message could not be sent right now. Please try again.\n\n" + e.message);
+  alert("Sorry, your message could not be sent right now.\n\n" + e.message);
 });
 
-      if (successWin) {
-        successWin.style.display = "block";
-        successWin.classList.add("open");
-        // center tiny success window
-        const pad = 12;
-        successWin.style.visibility = "hidden"; successWin.style.display = "block";
-        const rr = successWin.getBoundingClientRect();
-        const left = Math.max(pad, (window.innerWidth - rr.width) / 2);
-        const top  = Math.max(pad, (window.innerHeight - rr.height) / 2);
-        successWin.style.left = left + "px"; successWin.style.top  = top + "px";
-        successWin.style.visibility = "";
-      }
-      form.reset();
-      initCaptcha();
     });
   }
 
-  // ---------------- Kirby headphones pause and play (GIF + music; start paused)
+  // ---------------- Buddy (GIF + music; start paused)
   const buddy = document.getElementById("buddy");
   const buddyAudio = document.getElementById("buddyAudio");
   if (buddy && buddyAudio) {
@@ -422,7 +408,6 @@ fetch("/api/contact", {
     });
   }
 })();
-
 
 document.querySelectorAll(".dock .icon.launch[data-app]").forEach(btn => {
   const app = btn.dataset.app?.toLowerCase();
