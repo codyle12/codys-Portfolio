@@ -439,3 +439,63 @@ document.querySelectorAll(".dock .icon.launch[data-app]").forEach(btn => {
     btn.appendChild(img);
   }
 });
+
+(function () {
+  const ids = ["bgVideo-day", "bgVideo-night"];
+  const vids = ids.map(id => document.getElementById(id)).filter(Boolean);
+
+  function arm(v) {
+    if (!v || v.dataset.autoArmed === "1") return;
+    v.dataset.autoArmed = "1";
+    // Ensure attrs + properties for mobile Safari & Chrome
+    v.muted = true;
+    v.playsInline = true;
+    v.setAttribute("muted", "");
+    v.setAttribute("playsinline", "");
+    v.setAttribute("autoplay", "");
+    v.setAttribute("loop", "");
+    v.setAttribute("disablepictureinpicture", "");
+
+    const tryPlay = () => {
+      if (!document.body.contains(v)) return;
+      if (!v.paused && !v.ended) return;
+      const p = v.play();
+      if (p && typeof p.catch === "function") {
+        p.catch(() => { /* will retry on gesture/visibility */ });
+      }
+    };
+
+    // Resume if the browser pauses/blocks
+    ["pause","ended","stalled","suspend","waiting","error","emptied"].forEach(ev =>
+      v.addEventListener(ev, () => setTimeout(tryPlay, 0), { passive: true })
+    );
+
+    // When frames are ready
+    v.addEventListener("loadeddata", tryPlay, { passive: true });
+    v.addEventListener("canplay", tryPlay, { passive: true });
+    v.addEventListener("canplaythrough", tryPlay, { passive: true });
+
+    // After load + timed retries
+    window.addEventListener("load", () => { setTimeout(tryPlay, 0); setTimeout(tryPlay, 150); setTimeout(tryPlay, 600); }, { once: true });
+
+    // When tab becomes visible again
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) tryPlay(); });
+
+    // First user gesture (always allowed by browsers)
+    const onGesture = () => { tryPlay(); detachGestures(); };
+    function attachGestures() {
+      ["pointerdown","keydown","touchstart"].forEach(evt => window.addEventListener(evt, onGesture, { capture:false, once:true }));
+    }
+    function detachGestures() {
+      ["pointerdown","keydown","touchstart"].forEach(evt => window.removeEventListener(evt, onGesture, { capture:false }));
+    }
+    attachGestures();
+
+    // Gentle keep-alive for mobile throttling
+    let keepAlive = setInterval(tryPlay, 5000);
+    window.addEventListener("pagehide", () => clearInterval(keepAlive), { once:true });
+  }
+
+  vids.forEach(arm);
+})();
+
