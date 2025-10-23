@@ -40,7 +40,20 @@
   </nav>
 
   <div id="desktop">
-    <div id="bg" aria-hidden="true"></div>
+    <!-- Background element and video layers -->
+<div id="bg" aria-hidden="true"></div>
+
+<!-- Background videos (day/night). Fallback is #bg image if videos fail -->
+<video id="bgVideo-day" class="bgvideo" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+  <source src="assets/background/day.webm" type="video/webm">
+  <source src="assets/background/day.mp4" type="video/mp4">
+</video>
+
+<video id="bgVideo-night" class="bgvideo" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+  <source src="assets/background/night.webm" type="video/webm">
+  <source src="assets/background/night.mp4" type="video/mp4">
+</video>
+
 
     <section id="home" class="window" role="dialog" aria-labelledby="homeTitle">
       <header class="titlebar">
