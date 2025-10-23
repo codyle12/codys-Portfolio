@@ -457,53 +457,6 @@ input[type="email"] {
   caret-color: var(--accent, #4ee1ff);
 }
 
-<<<<<<< HEAD
-/* === Wii Hand === */
-
-/* Default pointer across the site */
-html, body {
-  cursor: url("assets/cursors/pointer.cur"), auto;
-}
-
-/* Interactive items use the pointer hand (upright finger) */
-a,
-button,
-[role="button"],
-.icon-btn,
-.launch,
-.dock-icon,
-button *,
-.icon-btn * {
-  cursor: url("assets/cursors/pointer.cur"), pointer !important;
-}
-
-/* Titlebars or draggable areas show the open hand (ready to grab) */
-.window .titlebar,
-[draggable="true"],
-.draggable {
-  cursor: url("assets/cursors/grab.cur"), grab !important;
-}
-
-/* While dragging — show the closed hand */
-body.is-dragging,
-.window.is-dragging .titlebar,
-.draggable:active,
-[draggable="true"]:active {
-  cursor: url("assets/cursors/grabbing.cur"), grabbing !important;
-}
-
-/* Prevent the Home window titlebar from showing grab */
-#home .titlebar {
-  cursor: url("assets/cursors/pointer.cur"), auto !important;
-}
-
-/* Slight pixel crispness bump so the cursor looks a bit larger */
-@media (pointer: fine) {
-  html, body {
-    image-rendering: pixelated;
-  }
-}
-=======
 /* Background videos with fade between light/dark mode */
 .bgvideo {
   position: absolute;
@@ -554,5 +507,4 @@ body.is-dragging,
 }
 
 
->>>>>>> 2e87e42786b010055a366cc9631ac138adc12a6d
 
