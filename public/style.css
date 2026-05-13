@@ -506,7 +506,7 @@ input[type="email"] {
   filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.9));
 }
 
-@media (max-wodth: 768px) {
+@media (max-width: 768px) {
   . app-window.open {
     top: 75px !important;
     left: 0 !important;
@@ -523,7 +523,7 @@ input[type="email"] {
   }
 
   .app-window .titlebar {
-    pointer-events: auto !important;
+    pointer-events: none !important;
   }
 
   .app-window .controls {
