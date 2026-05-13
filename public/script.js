@@ -182,7 +182,7 @@
   }
   function limitsFor(win) {
     const tb = cssNumber("--titlebar-h", 48);
-    const minTop = -(tb - 12);
+    const minTop = 80;
     const minLeft = -(win.offsetWidth - 80);
     const maxLeft = window.innerWidth - 40;
     const maxTop  = window.innerHeight - 40;
