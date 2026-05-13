@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Cody's Pixel Portfolio</title>
+  <title>Cody's Workshop</title>
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DotGothic16&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="style.css"/>
   <script defer src="script.js"></script>
@@ -40,7 +40,20 @@
   </nav>
 
   <div id="desktop">
-    <div id="bg" aria-hidden="true"></div>
+    <!-- Background element and video layers -->
+<div id="bg" aria-hidden="true"></div>
+
+<!-- Background videos (day/night). Fallback is #bg image if videos fail -->
+<video id="bgVideo-day" class="bgvideo" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+  <source src="assets/background/day.webm" type="video/webm">
+  <source src="assets/background/day.mp4" type="video/mp4">
+</video>
+
+<video id="bgVideo-night" class="bgvideo" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+  <source src="assets/background/night.webm" type="video/webm">
+  <source src="assets/background/night.mp4" type="video/mp4">
+</video>
+
 
     <section id="home" class="window" role="dialog" aria-labelledby="homeTitle">
       <header class="titlebar">
@@ -51,11 +64,19 @@
         <div class="hello">Hi! I'm <span class="name">Cody</span></div>
         <p class="hello-subtitle">full-stack web developer, gamer, and aspiring software engineer :)</p>
         <div class="dock" role="list">
-          <button class="icon launch" role="listitem" data-app="about">A</button>
-          <button class="icon launch" role="listitem" data-app="projects">P</button>
-          <button class="icon launch" role="listitem" data-app="contact">C</button>
-          <button class="icon launch" role="listitem" data-app="links">L</button>
-        </div>
+  <button class="icon launch" role="listitem" data-app="about" aria-label="About">
+    <img src="assets/icons/A.svg" alt="About" class="dock-icon">
+  </button>
+  <button class="icon launch" role="listitem" data-app="projects" aria-label="Projects">
+    <img src="assets/icons/P.svg" alt="Projects" class="dock-icon">
+  </button>
+  <button class="icon launch" role="listitem" data-app="contact" aria-label="Contact">
+    <img src="assets/icons/C.svg" alt="Contact" class="dock-icon">
+  </button>
+  <button class="icon launch" role="listitem" data-app="links" aria-label="Links">
+    <img src="assets/icons/L.svg" alt="Links" class="dock-icon">
+  </button>
+</div>
       </div>
     </section>
 
@@ -104,14 +125,14 @@
               <div id="bs-details" class="project-more" hidden>
                 <div class="project-more-inner">
                   <h5 class="underline">Challenges</h5>
-                  <p>This was my first 3D print, so there was a lot of trial and error since it was such a huge project...</p>
+                  <p>This was my first 3D print! There was a lot of trial and error since I was new to 3D modeling. I learned back in high-school on how to 3D model amateurishly using Fusion360, but this put my skills to the test since this was a more practical setting. I remember needing to mess with the supports and testing out several types of brims due to the parts I made constantly warping, but we got past the challenges! I played around with resin and plastic weld as a solution to fill in all the inconsistencies (and because I ran out of money for more filament) and I'm satisfied with how it came out in the end.</p>
                   <h5>The final product!</h5>
                   <figure class="project-photo-wrap">
                     <img src="assets/projects/buster-sword-final.jpg" alt="Finished Buster Sword mounted on the wall" class="project-photo" loading="lazy" decoding="async"/>
                     <figcaption class="caption">Finished build mounted on my wall :)</figcaption>
                   </figure>
                   <h5>Final Thoughts</h5>
-                  <p>I'm really happy with how this project turned out...</p>
+                  <p>I'm really happy with how the project came out! I'm really not sure why I chose to do something so huge as my first project honestly, but I admit its made doing smaller projects feel so much easier so I would gladly do it again.</p>
                 </div>
               </div>
             </div>
@@ -132,22 +153,22 @@
             <input type="text" value="codyle129@gmail.com" disabled aria-disabled="true"/>
           </div>
           <hr class="rule"/>
-          <form id="contactForm" autocomplete="on">
+          <form id="contactForm" action="https://formspree.io/f/xpwygbrg" method="POST" autocomplete="on">
             <div class="form-row">
               <label for="name">Your Name</label>
-              <input id="name" name="name" type="text" required/>
+              <input id="name" name="name" type="text" required placeholder="e.g. Aerith">
             </div>
             <div class="form-row">
               <label for="email">Your Email</label>
-              <input id="email" name="email" type="email" required/>
+              <input id="email" name="email" type="email" required placeholder="your@emailhere.com">
             </div>
             <div class="form-row">
               <label for="subject">Subject</label>
-              <input id="subject" name="subject" type="text" required/>
+              <input id="subject" name="subject" type="text" required placeholder="Let's build something cool!">
             </div>
             <div class="form-row">
               <label for="message">Message</label>
-              <textarea id="message" name="message" rows="8" required></textarea>
+              <textarea id="message" name="message" rows="8" required placeholder="Write your message here..."></textarea>
             </div>
             <div class="form-row captcha">
               <label id="captchaLabel" for="captchaAnswer">Prove you’re human:</label>
@@ -202,15 +223,13 @@
     </button>
     <audio id="buddyAudio" src="assets/audio/sticker-theme.mp3" preload="auto" loop></audio>
 
-    <!-- Optional external SFX (override WebAudio fallback if present) -->
     <audio id="sfxClick"   src="assets/audio/ui-click.mp3" preload="auto"></audio>
     <audio id="sfxDarkOn"  src="assets/audio/dark-on.mp3"  preload="auto"></audio>
     <audio id="sfxDarkOff" src="assets/audio/dark-off.mp3" preload="auto"></audio>
-    <!-- Error/fail sound when clicking a launcher that’s already at the front -->
+    <!-- Error/fail Zelda fail sound when clicking a launcher that’s already at the front -->
     <audio id="sfxFail"    src="assets/audio/ui-fail.mp3"  preload="auto"></audio>
   </div>
 
-  <!-- Standby overlay template -->
   <template id="standbyTemplate">
     <div class="standby-overlay">
       <div class="standby-card">
