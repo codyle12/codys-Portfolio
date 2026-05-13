@@ -506,5 +506,53 @@ input[type="email"] {
   filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.9));
 }
 
+@media (max-wodth: 768px) {
+  . app-window.open {
+    top: 75px !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: calc(100vh - 75px) !important;
+    max-width: none !important;
+    max-height: none !important;
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: none !important;
+    transform: none !important;
+    z-index: 1000 !important;
+  }
+
+  .app-window .titlebar {
+    pointer-events: auto !important;
+  }
+
+  .app-window .controls {
+    pointer-events: auto !important;
+  }
+
+  .app-window .content {
+    max-height: calc(100vh - 75px - var(--titlebar-h) - 10px) !important;
+    padding-bottom: 90px !important;
+  }
+
+  #darkToggle, #soundToggle {
+    position: fixed !important;
+    bottom: 16px !important;
+    z-index: 2000 !important;
+  }
+
+  #darkToggle { left: 16px !important; }
+  #soundToggle { left: 60px !important; }
+
+  #buddy {
+    z-index: 2000 !important;
+  }
+
+  #topbar .left {
+    justify-content: center !important;
+    width: 100% !important;
+  }
+}
+
 
 
